@@ -1,0 +1,3 @@
+seguindo o css do html me ajuda a criar um formulario de login senha com o mesmo css para ficar igual o desing do site. 
+
+seguindo o css do html me ajuda a criar um formulario com botao para cadastrar excluir e imprimir relatorios diarios semanal quizenal e mensal com o mesmo css para ficar igual o desing do site. 
