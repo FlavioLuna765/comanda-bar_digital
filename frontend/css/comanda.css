@@ -1,0 +1,13 @@
+        :root { --bg-dark: #0f0f0f; --card-dark: #1e1e1e; --accent-gold: #f39c12; --text-gray: #a0a0a0; --glass-border: rgba(255, 255, 255, 0.05); }
+        body { background-color: var(--bg-dark); font-family: 'Poppins', sans-serif; color: #ffffff; }
+        .header { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1974&auto=format&fit=crop'); background-size: cover; padding: 3rem 0; text-align: center; border-bottom: 2px solid var(--accent-gold); }
+        .header h1 { color: var(--accent-gold); font-weight: 700; }
+        .section-title { font-size: 1.2rem; font-weight: 600; margin: 2rem 0; text-align: center; text-transform: uppercase; color: var(--accent-gold); }
+        .menu-card { background: var(--card-dark); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; transition: 0.3s; margin-bottom: 1rem; }
+        .menu-card:hover { border-color: var(--accent-gold); transform: translateY(-5px); }
+        .price-label { font-size: 1.2rem; font-weight: 700; color: var(--accent-gold); display: block; text-align: center; }
+        .quantity-btn { background: var(--accent-gold); border: none; width: 30px; height: 30px; border-radius: 5px; font-weight: bold; }
+        .quantity-input { width: 40px; text-align: center; background: transparent; border: none; color: #fff; font-weight: bold; }
+        .total-card { background: var(--card-dark); border: 1px solid var(--accent-gold); border-radius: 16px; padding: 1.5rem; position: sticky; top: 20px; }
+        .btn-order { background: var(--accent-gold); color: #000; font-weight: 700; border-radius: 10px; padding: 10px; width: 100%; border: none; }
+        .status-badge { transition: 0.5s; font-weight: 600; }

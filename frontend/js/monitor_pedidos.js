@@ -1,35 +1,3 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Balcão - Monitor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <style>
-        body { background-color: #121212; color: white; }
-        .order-card { background: #1e1e1e; border-left: 5px solid #f39c12; border-radius: 8px; margin-bottom: 20px; }
-    </style>
-</head>
-<body>
-
-<nav class="navbar navbar-dark bg-dark border-bottom border-warning mb-4">
-    <div class="container">
-        <span class="navbar-brand fw-bold text-warning"><i class="bi bi-shop"></i> MONITOR DE PEDIDOS</span>
-        <button class="btn btn-outline-danger btn-sm" onclick="limparTudo()">Limpar Tudo</button>
-    </div>
-</nav>
-
-<div class="container text-center mb-3">
-    <small class="text-secondary">O som de alerta será emitido a cada novo pedido.</small>
-</div>
-
-<div class="container">
-    <div id="lista" class="row"></div>
-</div>
-
-<audio id="bellSound" src="https://assets.mixkit.co/active_storage/sfx/2256/2256-preview.mp3"></audio>
-
-<script>
     let totalPedidosAntigo = JSON.parse(localStorage.getItem('pedidosBalcao') || '[]').length;
 
     function render() {
@@ -91,6 +59,3 @@
     window.addEventListener('storage', render);
     setInterval(render, 2000);
     render();
-</script>
-</body>
-</html>
