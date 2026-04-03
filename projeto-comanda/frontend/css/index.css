@@ -1,0 +1,109 @@
+        :root {
+            --bg-dark: #0f0f0f;         /* Fundo quase preto */
+            --card-dark: #1e1e1e;       /* Cinza chumbo para o card */
+            --accent-gold: #f39c12;     /* Dourado para destaque */
+            --text-gray: #a0a0a0;       /* Texto secundário */
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            /* Fundo com imagem e overlay escuro para combinar com o cabeçalho da outra página */
+            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
+                        url('https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1974&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+        }
+
+        /* CARD ESTILO PREMIUM */
+        .welcome-card {
+            background: var(--card-dark);
+            border: 1px solid var(--accent-gold); /* Borda dourada fina */
+            padding: 4rem 2.5rem;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efeito de brilho sutil no card */
+        .welcome-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(243, 156, 18, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .welcome-title span {
+            color: var(--accent-gold);
+            display: block;
+        }
+
+        /* BOTÃO DOURADO MODERNO */
+        .btn-custom {
+            background: var(--accent-gold);
+            color: #000;
+            padding: 1.2rem 3rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 15px;
+            border: 2px solid var(--accent-gold);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .btn-custom:hover {
+            background: transparent;
+            color: var(--accent-gold);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(243, 156, 18, 0.3);
+        }
+
+        /* Ícone decorativo com círculo */
+        .brand-icon-wrapper {
+            width: 90px;
+            height: 90px;
+            background: rgba(243, 156, 18, 0.1);
+            border: 1px solid var(--accent-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+        }
+
+        .brand-icon {
+            font-size: 3rem;
+            color: var(--accent-gold);
+        }
+
+        .description {
+            color: var(--text-gray);
+            font-weight: 300;
+            margin-bottom: 2.5rem;
+        }
