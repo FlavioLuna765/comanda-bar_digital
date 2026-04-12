@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitor de Pedidos | Cozinha</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #0b0b0b; color: #fff; padding: 20px; }
+        .order-card { background: #1a1a1a; border-left: 5px solid #f39c12; border-radius: 10px; padding: 20px; margin-bottom: 15px; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .mesa-badge { background: #f39c12; color: #000; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>🍴 Pedidos <span style="color: #f39c12;">Pendentes</span></h2>
+            <span class="badge bg-success">Monitor Ativo</span>
+        </div>
+        <div id="painelPedidos" class="row"></div>
+    </div>
+
+    <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io('http://localhost:3001');
+        const painel = document.getElementById('painelPedidos');
+
+        // Carregar pedidos que já estavam pendentes ao abrir a página
+        async function carregarPendentes() {
+            const res = await fetch('http://localhost:3001/api/orders/pending');
+            const pedidos = await res.json();
+            pedidos.forEach(p => renderizarPedido(p));
+        }
+
+        function renderizarPedido(pedido) {
+            const html = `
+                <div class="col-md-4" id="order-${pedido._id}">
+                    <div class="order-card">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="mesa-badge">MESA ${pedido.table}</span>
+                            <small class="text-secondary">${new Date(pedido.createdAt).toLocaleTimeString()}</small>
+                        </div>
+                        <ul class="list-unstyled">
+                            ${pedido.items.map(item => `<li>• ${item}</li>`).join('')}
+                        </ul>
+                        <hr style="border-color: #333">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong>Total: R$ ${pedido.total.toFixed(2)}</strong>
+                            <button class="btn btn-sm btn-outline-success" onclick="finalizar('${pedido._id}')">OK</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            painel.insertAdjacentHTML('afterbegin', html);
+        }
+
+        // ESCUTAR NOVOS PEDIDOS EM TEMPO REAL
+        socket.on('newOrder', (pedido) => {
+            renderizarPedido(pedido);
+            new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play();
+        });
+
+        function finalizar(id) {
+            document.getElementById(`order-${id}`).remove();
+            // Aqui você poderia fazer um fetch para atualizar o status no banco para 'Finalizado'
+        }
+
+        carregarPendentes();
+    </script>
+</body>
+</html>

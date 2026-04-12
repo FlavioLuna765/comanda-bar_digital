@@ -26,9 +26,19 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/auth', authRoutes);
 
 // Produtos
+//app.get('/api/products', async (req, res) => {
+    //const products = await Product.find();
+    //res.json(products);
+//});
+
+// No seu server.js
 app.get('/api/products', async (req, res) => {
-    const products = await Product.find();
-    res.json(products);
+    try {
+        const products = await Product.find();
+        res.json(products);
+    } catch (err) {
+        res.status(500).json({ error: "Erro ao buscar produtos" });
+    }
 });
 
 app.post('/api/products', authMiddleware, async (req, res) => {
