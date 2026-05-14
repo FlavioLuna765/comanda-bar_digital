@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cervejaria 2026 - Acesso VIP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg-dark: #0f0f0f;
+            --card-dark: #1e1e1e;
+            --accent-gold: #f39c12;
+            --text-gray: #a0a0a0;
+            --input-bg: #2a2a2a;
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        body { 
+            background-color: var(--bg-dark); 
+            font-family: 'Poppins', sans-serif; 
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        /* --- ESTILOS DA TELA DE LOGIN/CADASTRO --- */
+        .auth-overlay {
+            background: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.9)), 
+                        url('https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1974&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-card {
+            background: var(--card-dark);
+            border: 1px solid var(--accent-gold);
+            padding: 2.5rem;
+            border-radius: 25px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            max-width: 450px;
+            width: 90%;
+        }
+
+        .profile-selector { display: flex; gap: 10px; margin-bottom: 20px; }
+        .profile-btn {
+            flex: 1; padding: 10px; background: var(--input-bg);
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            color: var(--text-gray); cursor: pointer; font-size: 0.75rem;
+            font-weight: 600; text-transform: uppercase; transition: 0.3s;
+        }
+        .profile-btn.active { border-color: var(--accent-gold); color: var(--accent-gold); background: rgba(243, 156, 18, 0.05); }
+
+        .form-label { color: var(--accent-gold); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .form-control-custom {
+            width: 100%; background: var(--input-bg); border: 1px solid var(--glass-border);
+            color: #fff; padding: 0.8rem; border-radius: 12px; outline: none; margin-bottom: 15px;
+        }
+        .form-control-custom:focus { border-color: var(--accent-gold); }
+
+        /* --- ESTILOS DO CARDÁPIO (O SEU CSS ENVIADO) --- */
+        .header { 
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                        url('https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1974&auto=format&fit=crop'); 
+            background-size: cover; background-position: center; padding: 5rem 0; text-align: center; border-bottom: 2px solid var(--accent-gold);
+        }
+        .header h1 { font-weight: 700; text-transform: uppercase; color: var(--accent-gold); }
+
+        .section-title { font-size: 1.5rem; font-weight: 600; color: #fff; margin: 3.5rem 0 2rem; text-align: center; text-transform: uppercase; }
+        .section-title::after { content: ""; display: block; width: 50px; height: 2px; background: var(--accent-gold); margin: 10px auto; }
+
+        .menu-card { 
+            background: var(--card-dark); border: 1px solid var(--glass-border); border-radius: 16px; 
+            padding: 2rem 1.5rem; height: 100%; transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .menu-card:hover { border-color: var(--accent-gold); transform: translateY(-8px); box-shadow: 0 10px 30px rgba(243, 156, 18, 0.1); }
+
+        .icon-circle {
+            width: 60px; height: 60px; background: rgba(243, 156, 18, 0.1); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--accent-gold); font-size: 1.8rem;
+        }
+
+        .menu-card h4 { font-size: 1.15rem; font-weight: 600; color: #fff; }
+        .menu-card .description { color: var(--text-gray); font-size: 0.85rem; margin-bottom: 1.5rem; }
+        .price-label { font-size: 1.3rem; font-weight: 700; color: var(--accent-gold); display: block; }
+
+        .btn-order {
+            background-color: transparent; color: var(--accent-gold); border: 2px solid var(--accent-gold);
+            border-radius: 12px; padding: 1rem 2.5rem; font-weight: 700; transition: all 0.3s; text-decoration: none; display: inline-block;
+        }
+        .btn-order:hover { background-color: var(--accent-gold); color: #000; box-shadow: 0 0 20px rgba(243, 156, 18, 0.4); }
+
+        .footer { border-top: 1px solid var(--glass-border); color: var(--text-gray); padding: 3rem 0; margin-top: 4rem; font-size: 0.9rem; }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <section id="auth-section" class="auth-overlay">
+        <div class="auth-card">
+            <div id="login-box">
+                <h2 class="text-center mb-4 text-uppercase fw-bold" style="color: var(--accent-gold); letter-spacing: 2px;">Acesso VIP</h2>
+                <div class="profile-selector">
+                    <button onclick="setRole('user')" class="profile-btn btn-role active" data-role="user">Cliente</button>
+                    <button onclick="setRole('adm')" class="profile-btn btn-role" data-role="adm">Admin</button>
+                </div>
+                <form onsubmit="handleAuth(event)">
+                    <label class="form-label">Identificação</label>
+                    <input type="text" class="form-control-custom" placeholder="Usuário ou E-mail" required>
+                    <label class="form-label">Senha</label>
+                    <input type="password" class="form-control-custom" placeholder="••••••••" required>
+                    <button type="submit" class="btn-order w-100 mt-2">ENTRAR NO SISTEMA</button>
+                </form>
+                <div class="text-center mt-3">
+                    <a href="#" onclick="toggleAuth('register-box')" class="text-decoration-none" style="color: var(--text-gray); font-size: 0.8rem;">Não tem conta? <b style="color: var(--accent-gold);">Cadastre-se</b></a>
+                </div>
+            </div>
+
+            <div id="register-box" class="hidden">
+                <h2 class="text-center mb-4 text-uppercase fw-bold" style="color: var(--accent-gold); letter-spacing: 2px;">Cadastro</h2>
+                <form onsubmit="handleAuth(event)">
+                    <label class="form-label">Nome Completo</label>
+                    <input type="text" class="form-control-custom" placeholder="Ex: Flávio Luna" required>
+                    <label class="form-label">E-mail</label>
+                    <input type="email" class="form-control-custom" placeholder="seu@email.com" required>
+                    <label class="form-label">Senha</label>
+                    <input type="password" class="form-control-custom" placeholder="••••••••" required>
+                    <button type="submit" class="btn-order w-100 mt-2">FINALIZAR CADASTRO</button>
+                </form>
+                <div class="text-center mt-3">
+                    <a href="#" onclick="toggleAuth('login-box')" class="text-decoration-none" style="color: var(--text-gray); font-size: 0.8rem;">Já é membro? <b style="color: var(--accent-gold);">Login</b></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="menu-section" class="hidden">
+        <header class="header">
+            <div class="container">
+                <h1 class="display-5">CERVEJARIA 2026</h1>
+                <p class="lead text-white-50">Sabor artesanal, ambiente exclusivo.</p>
+            </div>
+        </header>
+
+        <main class="container">
+            <h2 class="section-title">Nossas Geladas</h2>
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-6 col-lg-3">
+                    <div class="menu-card text-center">
+                        <div class="icon-circle"><i class="bi bi-beer"></i></div>
+                        <h4>Heineken Balde</h4>
+                        <p class="description">6 unidades long neck 330ml envoltas no gelo.</p>
+                        <span class="price-label">R$ 45,00</span>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="menu-card text-center">
+                        <div class="icon-circle"><i class="bi bi-cup-hot"></i></div>
+                        <h4>IPA Artesanal</h4>
+                        <p class="description">Balde com 6 garrafas de 600ml. Notas cítricas.</p>
+                        <span class="price-label">R$ 55,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title">Nossas Porções</h2>
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-6 col-lg-3">
+                    <div class="menu-card text-center">
+                        <div class="icon-circle"><i class="bi bi-moisture"></i></div>
+                        <h4>Iscas de Frango</h4>
+                        <p class="description">Crocantes por fora, suculentas por dentro.</p>
+                        <span class="price-label">R$ 60,00</span>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="menu-card text-center">
+                        <div class="icon-circle"><i class="bi bi-alt"></i></div>
+                        <h4>Calabresa Prime</h4>
+                        <p class="description">Defumada, com cebola roxa e molho chimichurri.</p>
+                        <span class="price-label">R$ 40,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5 py-5">
+                <a href="#" class="btn-order">FAZER PEDIDO <i class="bi bi-chevron-right ms-2"></i></a>
+            </div>
+        </main>
+
+        <footer class="footer text-center">
+            <div class="container">
+                <p class="mb-1 text-white">BEBA COM MODERAÇÃO</p>
+                <p>© 2026 - O Seu Bar Favorito</p>
+            </div>
+        </footer>
+    </section>
+
+    <script>
+        function toggleAuth(boxId) {
+            document.getElementById('login-box').classList.add('hidden');
+            document.getElementById('register-box').classList.add('hidden');
+            document.getElementById(boxId).classList.remove('hidden');
+        }
+
+        function setRole(role) {
+            document.querySelectorAll('.btn-role').forEach(b => b.classList.remove('active'));
+            document.querySelector(`[data-role="${role}"]`).classList.add('active');
+        }
+
+        function handleAuth(event) {
+            event.preventDefault();
+            // Simulação de login/cadastro
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('menu-section').classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lugar - Cafeteria Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --gold: #d4af37;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: radial-gradient(circle at top, #1a1a1d, #000);
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .btn-gold {
+            background: linear-gradient(45deg, #b8860b, #d4af37);
+            color: #000;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .table-item {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--gold);
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .table-item.active { background: var(--gold); color: #000; }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        #balcao-view, #menu-view { display: none; }
+        
+        .counter-badge {
+            background: var(--gold);
+            color: black;
+            border-radius: 50%;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TELA 1: SELEÇÃO DE MESA -->
+    <div id="setup-view" class="container">
+        <div class="glass-card text-center">
+            <h2 class="mb-4" style="color: var(--gold);">Lugar</h2>
+            <p>Escolha sua mesa:</p>
+            <div class="table-grid mb-4" id="tableContainer"></div>
+            <button class="btn btn-gold w-100 p-3" onclick="startOrder()">VER CARDÁPIO</button>
+        </div>
+    </div>
+
+    <!-- TELA 2: CARDÁPIO (CLIENTE SÓ VÊ ISSO) -->
+    <div id="menu-view" class="container">
+        <div class="text-center mb-4">
+            <h4 id="displayMesa">Mesa: --</h4>
+        </div>
+
+        <div class="glass-card">
+            <h5 class="mb-4 text-center">Nosso Cardápio</h5>
+            <div id="menuList"></div>
+        </div>
+
+        <div class="glass-card">
+            <label class="form-label small">Como deseja pagar?</label>
+            <select id="paymentMethod" class="form-select bg-dark text-white border-secondary mb-4">
+                <option value="Pix">Pix</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Cartão de Débito">Cartão de Débito</option>
+            </select>
+
+            <button class="btn btn-gold w-100 p-3" onclick="enviarPedido()">
+                <i class="bi bi-send-fill me-2"></i> ENVIAR PEDIDO
+            </button>
+            <p class="text-center mt-3 small text-muted">O valor final incluirá 10% de taxa de serviço.</p>
+        </div>
+    </div>
+
+    <!-- TELA 3: BALCÃO (ADMINISTRAÇÃO VÊ TUDO AQUI) -->
+    <div id="balcao-view" class="container">
+        <div class="glass-card border-warning">
+            <h3 class="text-center mb-4" style="color: var(--gold);">Painel do Balcão</h3>
+            
+            <div id="dadosPedidoFull">
+                <!-- Informações detalhadas aqui -->
+            </div>
+
+            <hr class="my-4" style="border-color: var(--gold);">
+            
+            <div class="d-grid gap-2">
+                <button class="btn btn-success" onclick="location.reload()">CONCLUIR E LIMPAR MESA</button>
+                <button class="btn btn-outline-light btn-sm" onclick="window.print()">IMPRIMIR VIA COZINHA</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedTable = null;
+        let cart = [];
+        const menuItems = [
+            { id: 1, name: "Espresso", price: 8.50 },
+            { id: 2, name: "Cappuccino", price: 14.00 },
+            { id: 3, name: "Croissant", price: 16.00 },
+            { id: 4, name: "Torta Holandesa", price: 18.00 }
+        ];
+
+        // Gerar 10 Mesas
+        const tableContainer = document.getElementById('tableContainer');
+        for (let i = 1; i <= 10; i++) {
+            const div = document.createElement('div');
+            div.className = 'table-item';
+            div.innerText = i;
+            div.onclick = () => {
+                document.querySelectorAll('.table-item').forEach(t => t.classList.remove('active'));
+                div.classList.add('active');
+                selectedTable = i;
+            };
+            tableContainer.appendChild(div);
+        }
+
+        function startOrder() {
+            if (!selectedTable) return alert("Selecione a mesa.");
+            document.getElementById('setup-view').style.display = 'none';
+            document.getElementById('menu-view').style.display = 'block';
+            document.getElementById('displayMesa').innerText = `Mesa: ${selectedTable}`;
+            renderMenu();
+        }
+
+        function renderMenu() {
+            const menuList = document.getElementById('menuList');
+            menuList.innerHTML = menuItems.map(item => `
+                <div class="menu-item">
+                    <span>${item.name}</span>
+                    <button class="btn btn-sm btn-gold" onclick="addToCart(${item.id})">ADICIONAR</button>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(id) {
+            const item = menuItems.find(i => i.id === id);
+            cart.push(item);
+            // Feedback simples para o cliente sem mostrar a comanda
+            alert(`${item.name} adicionado!`);
+        }
+
+        function enviarPedido() {
+            if (cart.length === 0) return alert("Seu carrinho está vazio.");
+            
+            const method = document.getElementById('paymentMethod').value;
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const taxa = subtotal * 0.10;
+            const total = subtotal + taxa;
+            const precisaMaquina = method.includes("Cartão") ? "SIM" : "NÃO";
+
+            // Troca de tela
+            document.getElementById('menu-view').style.display = 'none';
+            document.getElementById('balcao-view').style.display = 'block';
+
+            // Monta o relatório completo para o Balcão
+            document.getElementById('dadosPedidoFull').innerHTML = `
+                <div class="mb-4">
+                    <p class="mb-1"><strong>MESA:</strong> <span class="fs-4 text-warning">${selectedTable}</span></p>
+                    <p class="mb-1"><strong>STATUS:</strong> <span class="badge bg-danger">COMANDA ABERTA</span></p>
+                    <p class="mb-1"><strong>PAGAMENTO:</strong> ${method}</p>
+                    <p class="mb-1"><strong>LEVAR MÁQUINA?</strong> <mark>${precisaMaquina}</mark></p>
+                </div>
+
+                <div class="bg-white text-dark p-3 rounded mb-3 shadow-sm" style="font-family: monospace;">
+                    <p class="text-center fw-bold">--- DETALHES DO PEDIDO ---</p>
+                    ${cart.map(item => `<div class="d-flex justify-content-between"><span>${item.name}</span><span>R$ ${item.price.toFixed(2)}</span></div>`).join('')}
+                    <hr>
+                    <div class="d-flex justify-content-between"><span>Subtotal:</span><span>R$ ${subtotal.toFixed(2)}</span></div>
+                    <div class="d-flex justify-content-between"><span>Taxa Serviço (10%):</span><span>R$ ${taxa.toFixed(2)}</span></div>
+                    <div class="d-flex justify-content-between fw-bold fs-5 mt-2"><span>TOTAL:</span><span>R$ ${total.toFixed(2)}</span></div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

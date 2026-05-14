@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>Cervejaria 2026 - Acesso VIP</title>
+    <style>
+        :root {
+            --bg-dark: #0f0f0f;
+            --card-dark: #1e1e1e;
+            --accent-gold: #f39c12;
+            --text-gray: #a0a0a0;
+            --input-bg: #2a2a2a;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
+                        url('https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1974&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+        }
+
+        .auth-card {
+            background: var(--card-dark);
+            border: 1px solid var(--accent-gold);
+            padding: 2.5rem;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            max-width: 450px;
+            width: 90%;
+        }
+
+        .title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #fff;
+        }
+
+        .subtitle {
+            color: var(--text-gray);
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        /* SELEÇÃO DE PERFIL */
+        .profile-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-btn {
+            flex: 1;
+            padding: 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-gray);
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .profile-btn.active {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+            background: rgba(243, 156, 18, 0.05);
+        }
+
+        /* FORMULÁRIOS */
+        .form-group { margin-bottom: 1.2rem; }
+
+        .form-label {
+            display: block;
+            color: var(--accent-gold);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            margin-left: 5px;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-gold);
+            background-color: #252525;
+        }
+
+        .btn-main {
+            background: var(--accent-gold);
+            color: #000;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 12px;
+            border: 2px solid var(--accent-gold);
+            transition: 0.3s;
+            text-transform: uppercase;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .btn-main:hover {
+            background: transparent;
+            color: var(--accent-gold);
+        }
+
+        .footer-links {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .link-item {
+            display: block;
+            color: var(--text-gray);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .link-item:hover { color: var(--accent-gold); }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        
+        <div id="section-login">
+            <div class="title">Acesso VIP</div>
+            <div class="subtitle">Entre para ver o cardápio exclusivo</div>
+
+            <div class="profile-selector">
+                <button type="button" onclick="setRole('user')" class="profile-btn btn-role active" data-role="user">Cliente</button>
+                <button type="button" onclick="setRole('adm')" class="profile-btn btn-role" data-role="adm">Admin</button>
+            </div>
+
+            <form id="form-login">
+                <div class="form-group">
+                    <label class="form-label">Identificação</label>
+                    <input type="text" class="form-control" required placeholder="E-mail ou Usuário">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Senha</label>
+                    <input type="password" class="form-control" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-main">Entrar</button>
+            </form>
+
+            <div class="footer-links">
+                <a href="javascript:void(0)" onclick="showSection('section-forgot')" class="link-item">Esqueci minha senha</a>
+                <a href="javascript:void(0)" onclick="showSection('section-register')" class="link-item">Não tem conta? <b>Cadastre-se</b></a>
+            </div>
+        </div>
+
+        <div id="section-register" class="hidden">
+            <div class="title">Novo Cadastro</div>
+            <div class="subtitle">Crie sua conta VIP na Cervejaria</div>
+
+            <form id="form-register">
+                <div class="form-group">
+                    <label class="form-label">Nome Completo</label>
+                    <input type="text" class="form-control" required placeholder="Seu nome">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">E-mail</label>
+                    <input type="email" class="form-control" required placeholder="seu@email.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Senha</label>
+                    <input type="password" class="form-control" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-main">Cadastrar</button>
+            </form>
+
+            <div class="footer-links">
+                <a href="javascript:void(0)" onclick="showSection('section-login')" class="link-item">Já sou membro? Login</a>
+            </div>
+        </div>
+
+        <div id="section-forgot" class="hidden">
+            <div class="title">Recuperar</div>
+            <div class="subtitle">Insira seu e-mail cadastrado</div>
+
+            <form id="form-forgot">
+                <div class="form-group">
+                    <label class="form-label">E-mail</label>
+                    <input type="email" class="form-control" required placeholder="seu@email.com">
+                </div>
+                <button type="submit" class="btn-main">Enviar Link</button>
+            </form>
+
+            <div class="footer-links">
+                <a href="javascript:void(0)" onclick="showSection('section-login')" class="link-item">Voltar ao início</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Variável para armazenar o papel selecionado
+        let selectedRole = 'user';
+
+        // Função para alternar entre as telas (Login/Cadastro/Esqueci)
+        function showSection(sectionId) {
+            document.getElementById('section-login').classList.add('hidden');
+            document.getElementById('section-register').classList.add('hidden');
+            document.getElementById('section-forgot').classList.add('hidden');
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+
+        // Função para selecionar entre Cliente ou Admin
+        function setRole(role) {
+            selectedRole = role;
+            const buttons = document.querySelectorAll('.btn-role');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.getAttribute('data-role') === role) btn.classList.add('active');
+            });
+        }
+
+        // FUNÇÃO DE REDIRECIONAMENTO
+        const handleAccess = (e) => {
+            e.preventDefault();
+            
+            // Aqui você faria a chamada para o seu backend (Node/MongoDB)
+            // Por enquanto, simulamos o sucesso:
+            
+            if (selectedRole === 'adm') {
+                alert("Acesso Administrativo Concedido!");
+                // Se tiver uma dashboard de adm, mude o nome do arquivo aqui:
+                window.location.href = "cardapio.html"; 
+            } else {
+                alert("Bem-vindo à Cervejaria 2026!");
+                // Nome do seu arquivo de cardápio que você enviou:
+                window.location.href = "cardapio.html"; 
+            }
+        };
+
+        // Atribuindo os eventos aos botões
+        document.getElementById('form-login').addEventListener('submit', handleAccess);
+        document.getElementById('form-register').addEventListener('submit', handleAccess);
+        
+        document.getElementById('form-forgot').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert("Verifique seu e-mail para recuperar a senha.");
+            showSection('section-login');
+        });
+    </script>
+</body>
+</html>

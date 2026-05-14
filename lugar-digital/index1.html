@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lugar - Cafeteria</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        :root { --gold: #d4af37; --dark: #0a0a0b; }
+        body { background: var(--dark); color: #fff; font-family: 'Poppins', sans-serif; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; }
+        .mesa { border: 2px solid var(--gold); border-radius: 10px; padding: 15px; cursor: pointer; transition: 0.3s; text-align: center; }
+        .mesa.ocupada { border-color: #ff4444; opacity: 0.6; cursor: not-allowed; }
+        .mesa.livre:hover { background: var(--gold); color: #000; }
+        .btn-gold { background: var(--gold); color: #000; font-weight: bold; border-radius: 8px; }
+    </style>
+</head>
+<body class="container py-4">
+
+    <!-- SELEÇÃO DE MESA -->
+    <div id="view-mesas">
+        <h2 class="text-center mb-4" style="color: var(--gold);">Lugar - Selecione sua Mesa</h2>
+        <div class="row g-3" id="grid-mesas"></div>
+    </div>
+
+    <!-- CARDÁPIO -->
+    <div id="view-cardapio" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 id="mesa-ativa" style="color: var(--gold);">Mesa --</h3>
+            <button class="btn btn-outline-light btn-sm" onclick="location.reload()">Sair</button>
+        </div>
+
+        <div class="glass mb-4">
+            <h5>Cardápio</h5>
+            <div id="lista-produtos"></div>
+        </div>
+
+        <div class="glass">
+            <h5>Sua Comanda (Aberta)</h5>
+            <div id="itens-comanda" class="mb-3"></div>
+            <div class="d-flex justify-content-between fw-bold border-top pt-2">
+                <span>Total Atual:</span>
+                <span id="total-cliente" style="color: var(--gold);">R$ 0,00</span>
+            </div>
+            <button class="btn btn-gold w-100 mt-3 p-3" onclick="enviarPedidoAoBalcao()">
+                <i class="bi bi-send-check-fill me-2"></i>ENVIAR PEDIDO AO BALCÃO
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let mesaSelecionada = null;
+        let carrinhoTemporario = [];
+        const produtos = [
+            {id: 1, nome: "Espresso", preco: 9.00},
+            {id: 2, nome: "Cappuccino", preco: 15.00},
+            {id: 3, nome: "Torta de Limão", preco: 14.00}
+        ];
+
+        function initMesas() {
+            const grid = document.getElementById('grid-mesas');
+            const statusMesas = JSON.parse(localStorage.getItem('statusMesas')) || {};
+            grid.innerHTML = '';
+            for(let i=1; i<=10; i++) {
+                const ocupada = statusMesas[i] === 'ocupada';
+                grid.innerHTML += `
+                    <div class="col-6 col-md-3">
+                        <div class="mesa ${ocupada ? 'ocupada' : 'livre'}" onclick="${ocupada ? '' : `abrirMesa(${i})`}">
+                            <i class="bi bi- house-door"></i><br>
+                            Mesa ${i}<br>
+                            <small>${ocupada ? 'OCUPADA' : 'LIVRE'}</small>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        function abrirMesa(num) {
+            mesaSelecionada = num;
+            document.getElementById('view-mesas').style.display = 'none';
+            document.getElementById('view-cardapio').style.display = 'block';
+            document.getElementById('mesa-ativa').innerText = "Mesa " + num;
+            
+            // Marcar mesa como ocupada no "servidor"
+            let status = JSON.parse(localStorage.getItem('statusMesas')) || {};
+            status[num] = 'ocupada';
+            localStorage.setItem('statusMesas', JSON.stringify(status));
+            
+            renderCardapio();
+        }
+
+        function renderCardapio() {
+            const container = document.getElementById('lista-produtos');
+            container.innerHTML = produtos.map(p => `
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <span>${p.nome} - R$ ${p.preco.toFixed(2)}</span>
+                    <button class="btn btn-sm btn-outline-warning" onclick="addCarrinho(${p.id})">Adicionar</button>
+                </div>
+            `).join('');
+        }
+
+        function addCarrinho(id) {
+            const p = produtos.find(x => x.id === id);
+            carrinhoTemporario.push(p);
+            updateViewCliente();
+        }
+
+        function updateViewCliente() {
+            const container = document.getElementById('itens-comanda');
+            const total = carrinhoTemporario.reduce((a, b) => a + b.preco, 0);
+            container.innerHTML = carrinhoTemporario.map(i => `<div>• ${i.nome}</div>`).join('');
+            document.getElementById('total-cliente').innerText = `R$ ${(total * 1.1).toFixed(2)} (c/ 10%)`;
+        }
+
+        function enviarPedidoAoBalcao() {
+            if(carrinhoTemporario.length === 0) return alert("Adicione itens!");
+            
+            let pedidos = JSON.parse(localStorage.getItem('pedidosBalcao')) || [];
+            pedidos.push({
+                mesa: mesaSelecionada,
+                itens: [...carrinhoTemporario],
+                hora: new Date().toLocaleTimeString()
+            });
+            localStorage.setItem('pedidosBalcao', JSON.stringify(pedidos));
+            
+            alert("Pedido enviado para a cozinha!");
+            carrinhoTemporario = []; // Limpa o temporário após enviar
+            updateViewCliente();
+        }
+
+        initMesas();
+    </script>
+</body>
+</html>

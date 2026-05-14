@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lugar - Cafeteria Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark: #0a0a0b;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: radial-gradient(circle at top, #1a1a1d, #000);
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .btn-gold {
+            background: linear-gradient(45deg, #b8860b, #d4af37);
+            color: #000;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4); }
+
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .table-item {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--gold);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .table-item.active { background: var(--gold); color: #000; }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        #balcao-view, #menu-view { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- TELA 1: SELEÇÃO DE MESA -->
+    <div id="setup-view" class="container">
+        <div class="glass-card text-center">
+            <h2 class="mb-4" style="color: var(--gold);">Lugar - Cafeteria</h2>
+            <p>Selecione sua mesa:</p>
+            <div class="table-grid mb-4" id="tableContainer"></div>
+            <button class="btn btn-gold w-100 p-3" onclick="startOrder()">ABRIR COMANDA</button>
+        </div>
+    </div>
+
+    <!-- TELA 2: CARDÁPIO E COMANDA -->
+    <div id="menu-view" class="container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h4 class="mb-0" id="displayMesa">Mesa: --</h4>
+                <span id="comandaStatus" class="status-badge bg-success">Status: Aberta</span>
+            </div>
+            <i class="bi bi-cup-hot-fill" style="color: var(--gold); font-size: 1.5rem;"></i>
+        </div>
+
+        <div class="glass-card">
+            <h5 class="mb-3"><i class="bi bi-book me-2"></i>Cardápio</h5>
+            <div id="menuList"></div>
+        </div>
+
+        <div class="glass-card">
+            <h5 class="mb-3"><i class="bi bi-receipt me-2"></i>Sua Comanda</h5>
+            <div id="cartList" class="mb-3 small"></div>
+            <hr style="border-color: var(--glass-border);">
+            
+            <div class="d-flex justify-content-between text-muted mb-1" style="font-size: 0.9rem;">
+                <span>Subtotal:</span>
+                <span id="subtotal">R$ 0,00</span>
+            </div>
+            <div class="d-flex justify-content-between text-muted mb-2" style="font-size: 0.9rem;">
+                <span>Taxa de Serviço (10%):</span>
+                <span id="taxaServico">R$ 0,00</span>
+            </div>
+            <div class="d-flex justify-content-between fw-bold mb-4" style="font-size: 1.2rem; color: var(--gold);">
+                <span>Total Final:</span>
+                <span id="totalFinal">R$ 0,00</span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small">Forma de Pagamento:</label>
+                <select id="paymentMethod" class="form-select bg-dark text-white border-secondary">
+                    <option value="Pix">Pix (QR Code no Balcão)</option>
+                    <option value="Cartão de Crédito">Cartão de Crédito (Levar Máquina)</option>
+                    <option value="Cartão de Débito">Cartão de Débito (Levar Máquina)</option>
+                </select>
+            </div>
+
+            <button class="btn btn-gold w-100" onclick="fecharComanda()">SOLICITAR FECHAMENTO</button>
+        </div>
+    </div>
+
+    <!-- TELA 3: BALCÃO -->
+    <div id="balcao-view" class="container">
+        <div class="glass-card">
+            <h3 class="text-center mb-4" style="color: var(--gold);">Painel de Pedidos</h3>
+            <div id="orderSummary"></div>
+            <hr>
+            <div class="alert alert-info bg-dark text-info border-info small">
+                <i class="bi bi-info-circle me-2"></i> 
+                Informação enviada para o terminal do garçom com sucesso.
+            </div>
+            <button class="btn btn-outline-light w-100 mt-3" onclick="location.reload()">NOVO CLIENTE</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedTable = null;
+        let cart = [];
+        const menuItems = [
+            { id: 1, name: "Espresso Premium", price: 8.50 },
+            { id: 2, name: "Cappuccino Gold", price: 14.00 },
+            { id: 3, name: "Croissant Gourmet", price: 16.00 },
+            { id: 4, name: "Fatia de Torta", price: 18.00 }
+        ];
+
+        // Gerar Mesas
+        const tableContainer = document.getElementById('tableContainer');
+        for (let i = 1; i <= 10; i++) {
+            const div = document.createElement('div');
+            div.className = 'table-item';
+            div.innerText = i;
+            div.onclick = () => {
+                document.querySelectorAll('.table-item').forEach(t => t.classList.remove('active'));
+                div.classList.add('active');
+                selectedTable = i;
+            };
+            tableContainer.appendChild(div);
+        }
+
+        function startOrder() {
+            if (!selectedTable) return alert("Selecione a mesa.");
+            document.getElementById('setup-view').style.display = 'none';
+            document.getElementById('menu-view').style.display = 'block';
+            document.getElementById('displayMesa').innerText = `Mesa: ${selectedTable}`;
+            renderMenu();
+        }
+
+        function renderMenu() {
+            const menuList = document.getElementById('menuList');
+            menuList.innerHTML = menuItems.map(item => `
+                <div class="menu-item">
+                    <span>${item.name}</span>
+                    <div>
+                        <span class="me-3 small">R$ ${item.price.toFixed(2)}</span>
+                        <button class="btn btn-sm btn-gold" onclick="addToCart(${item.id})"><i class="bi bi-plus"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(id) {
+            const item = menuItems.find(i => i.id === id);
+            cart.push(item);
+            updateComanda();
+        }
+
+        function updateComanda() {
+            const cartList = document.getElementById('cartList');
+            const subtotalSpan = document.getElementById('subtotal');
+            const taxaSpan = document.getElementById('taxaServico');
+            const totalSpan = document.getElementById('totalFinal');
+            
+            if (cart.length === 0) {
+                cartList.innerHTML = '<p class="text-muted">Comanda vazia...</p>';
+                return;
+            }
+
+            cartList.innerHTML = cart.map(item => `
+                <div class="d-flex justify-content-between mb-1">
+                    <span>${item.name}</span>
+                    <span>R$ ${item.price.toFixed(2)}</span>
+                </div>
+            `).join('');
+
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const taxa = subtotal * 0.10;
+            const total = subtotal + taxa;
+
+            subtotalSpan.innerText = `R$ ${subtotal.toFixed(2)}`;
+            taxaSpan.innerText = `R$ ${taxa.toFixed(2)}`;
+            totalSpan.innerText = `R$ ${total.toFixed(2)}`;
+        }
+
+        function fecharComanda() {
+            if (cart.length === 0) return alert("Adicione itens antes de fechar.");
+            
+            const method = document.getElementById('paymentMethod').value;
+            const needsMachine = method.includes("Cartão") ? "SIM - LEVAR MÁQUINA" : "NÃO (Pagamento no Balcão)";
+            
+            document.getElementById('menu-view').style.display = 'none';
+            document.getElementById('balcao-view').style.display = 'block';
+            
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const total = subtotal * 1.10;
+
+            document.getElementById('orderSummary').innerHTML = `
+                <div class="text-center mb-4">
+                    <span class="badge bg-danger p-2 px-3">COMANDA FECHADA</span>
+                </div>
+                <div class="mb-3">
+                    <p class="mb-1"><strong>Mesa:</strong> ${selectedTable}</p>
+                    <p class="mb-1"><strong>Forma de Pagamento:</strong> ${method}</p>
+                    <p class="mb-1 text-warning"><strong>Solicita Máquina:</strong> ${needsMachine}</p>
+                </div>
+                <div class="bg-dark p-3 rounded border border-secondary mb-3">
+                    <p class="small mb-2">Resumo da Conta:</p>
+                    <div class="d-flex justify-content-between small"><span>Subtotal:</span><span>R$ ${subtotal.toFixed(2)}</span></div>
+                    <div class="d-flex justify-content-between small"><span>Taxa (10%):</span><span>R$ ${(subtotal*0.1).toFixed(2)}</span></div>
+                    <div class="d-flex justify-content-between fw-bold mt-2 border-top pt-2">
+                        <span>TOTAL PAGO:</span><span style="color:var(--gold)">R$ ${total.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

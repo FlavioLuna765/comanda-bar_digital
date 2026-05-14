@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lugar - Cafeteria Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark: #0a0a0b;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: radial-gradient(circle at top, #1a1a1d, #000);
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .btn-gold {
+            background: linear-gradient(45deg, #b8860b, #d4af37);
+            color: #000;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px;
+        }
+
+        .table-item {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--gold);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        .table-item.active {
+            background: var(--gold);
+            color: #000;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .badge-price {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        #balcao-view { display: none; }
+        #menu-view { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- TELA 1: SELEÇÃO DE MESA -->
+    <div id="setup-view" class="container">
+        <div class="glass-card text-center">
+            <h2 class="mb-4" style="color: var(--gold);">Lugar - Cafeteria</h2>
+            <p>Selecione sua mesa para iniciar:</p>
+            <div class="table-grid mb-4" id="tableContainer">
+                <!-- Gerado via JS -->
+            </div>
+            <button class="btn btn-gold w-100 p-3" onclick="startOrder()">ABRIR CARDÁPIO</button>
+        </div>
+    </div>
+
+    <!-- TELA 2: CARDÁPIO E COMANDA -->
+    <div id="menu-view" class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 id="displayMesa">Mesa: --</h4>
+            <i class="bi bi-cup-hot-fill" style="color: var(--gold); font-size: 1.5rem;"></i>
+        </div>
+
+        <div class="glass-card">
+            <h5 class="mb-3">Cafés e Bebidas</h5>
+            <div id="menuList">
+                <!-- Itens do cardápio -->
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h5>Sua Comanda</h5>
+            <div id="cartList" class="mb-3 small">
+                <p class="text-muted">Nenhum item selecionado.</p>
+            </div>
+            <div class="d-flex justify-content-between fw-bold mb-3">
+                <span>Total:</span>
+                <span id="cartTotal">R$ 0,00</span>
+            </div>
+            <button class="btn btn-gold w-100" onclick="sendToBalcao()">ENVIAR PEDIDO</button>
+        </div>
+    </div>
+
+    <!-- TELA 3: BALCÃO (COZINHA/CAIXA) -->
+    <div id="balcao-view" class="container">
+        <div class="glass-card border-warning">
+            <h3 class="text-center mb-4" style="color: var(--gold);">Painel do Balcão</h3>
+            <div id="orderSummary">
+                <!-- Resumo final -->
+            </div>
+            <hr>
+            <button class="btn btn-outline-light w-100" onclick="location.reload()">NOVO ATENDIMENTO</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedTable = null;
+        let cart = [];
+        const menuItems = [
+            { id: 1, name: "Espresso Premium", price: 8.50 },
+            { id: 2, name: "Cappuccino Gold", price: 14.00 },
+            { id: 3, name: "Croissant de Manteiga", price: 12.00 },
+            { id: 4, name: "Torta de Chocolate", price: 18.50 }
+        ];
+
+        // Inicializar 10 mesas
+        const tableContainer = document.getElementById('tableContainer');
+        for (let i = 1; i <= 10; i++) {
+            const div = document.createElement('div');
+            div.className = 'table-item';
+            div.innerText = i;
+            div.onclick = () => {
+                document.querySelectorAll('.table-item').forEach(t => t.classList.remove('active'));
+                div.classList.add('active');
+                selectedTable = i;
+            };
+            tableContainer.appendChild(div);
+        }
+
+        function startOrder() {
+            if (!selectedTable) return alert("Por favor, selecione uma mesa.");
+            document.getElementById('setup-view').style.display = 'none';
+            document.getElementById('menu-view').style.display = 'block';
+            document.getElementById('displayMesa').innerText = `Mesa: ${selectedTable}`;
+            renderMenu();
+        }
+
+        function renderMenu() {
+            const menuList = document.getElementById('menuList');
+            menuList.innerHTML = menuItems.map(item => `
+                <div class="menu-item">
+                    <span>${item.name}</span>
+                    <div>
+                        <span class="badge-price me-3">R$ ${item.price.toFixed(2)}</span>
+                        <button class="btn btn-sm btn-gold" onclick="addToCart(${item.id})">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(id) {
+            const item = menuItems.find(i => i.id === id);
+            cart.push(item);
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartList = document.getElementById('cartList');
+            const totalSpan = document.getElementById('cartTotal');
+            
+            if (cart.length === 0) {
+                cartList.innerHTML = '<p class="text-muted">Nenhum item selecionado.</p>';
+                return;
+            }
+
+            cartList.innerHTML = cart.map(item => `<div>• ${item.name} - R$ ${item.price.toFixed(2)}</div>`).join('');
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            totalSpan.innerText = `R$ ${total.toFixed(2)}`;
+        }
+
+        function sendToBalcao() {
+            if (cart.length === 0) return alert("Adicione itens ao pedido.");
+            
+            document.getElementById('menu-view').style.display = 'none';
+            document.getElementById('balcao-view').style.display = 'block';
+            
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            const orderSummary = document.getElementById('orderSummary');
+            
+            orderSummary.innerHTML = `
+                <div class="text-center mb-3">
+                    <span class="badge bg-success">PEDIDO ENVIADO!</span>
+                </div>
+                <p><strong>Mesa:</strong> ${selectedTable}</p>
+                <p><strong>Itens:</strong></p>
+                <ul class="list-unstyled">
+                    ${cart.map(item => `<li><i class="bi bi-check2-circle text-success"></i> ${item.name}</li>`).join('')}
+                </ul>
+                <h4 class="text-end" style="color: var(--gold);">Total: R$ ${total.toFixed(2)}</h4>
+            `;
+        }
+    </script>
+</body>
+</html>

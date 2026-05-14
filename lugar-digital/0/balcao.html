@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Balcão - Lugar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; font-family: sans-serif; }
+        .card-pedido { border-left: 5px solid #d4af37; margin-bottom: 15px; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <h2>Monitor de Pedidos em Aberto</h2>
+        <div>
+            <button class="btn btn-info" onclick="gerarRelatorioVendas()">Relatório de Vendas</button>
+            <button class="btn btn-danger" onclick="limparTudo()">Resetar Dia</button>
+        </div>
+    </div>
+
+    <div id="lista-pedidos-balcao" class="row">
+        <!-- Pedidos aparecem aqui -->
+    </div>
+
+    <!-- Div invisível para relatório de impressão -->
+    <div id="relatorio-print" style="display:none;"></div>
+
+    <script>
+        function atualizarBalcao() {
+            const pedidos = JSON.parse(localStorage.getItem('pedidosBalcao')) || [];
+            const container = document.getElementById('lista-pedidos-balcao');
+            
+            // Agrupar por mesa para facilitar o fechamento
+            const mesasAgrupadas = pedidos.reduce((acc, p) => {
+                if (!acc[p.mesa]) acc[p.mesa] = [];
+                acc[p.mesa].push(...p.itens);
+                return acc;
+            }, {});
+
+            container.innerHTML = '';
+            for (let mesa in mesasAgrupadas) {
+                const itens = mesasAgrupadas[mesa];
+                const subtotal = itens.reduce((a, b) => a + b.preco, 0);
+                const total = subtotal * 1.10;
+
+                container.innerHTML += `
+                    <div class="col-md-4">
+                        <div class="card card-pedido shadow-sm p-3">
+                            <h5>Mesa ${mesa}</h5>
+                            <ul class="small">
+                                ${itens.map(i => `<li>${i.nome}</li>`).join('')}
+                            </ul>
+                            <div class="text-end">
+                                <strong>Total: R$ ${total.toFixed(2)}</strong><br>
+                                <button class="btn btn-sm btn-success mt-2" onclick="fecharMesa(${mesa}, ${total})">Fechar e Pagar</button>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        function fecharMesa(num, totalPago) {
+            // Salva no histórico de vendas antes de apagar
+            let vendas = JSON.parse(localStorage.getItem('vendasDia')) || [];
+            vendas.push({ mesa: num, total: totalPago, data: new Date().toLocaleString() });
+            localStorage.setItem('vendasDia', JSON.stringify(vendas));
+
+            // Remove os pedidos da mesa
+            let pedidos = JSON.parse(localStorage.getItem('pedidosBalcao')) || [];
+            pedidos = pedidos.filter(p => p.mesa != num);
+            localStorage.setItem('pedidosBalcao', JSON.stringify(pedidos));
+
+            // Libera a mesa no sistema
+            let status = JSON.parse(localStorage.getItem('statusMesas')) || {};
+            status[num] = 'livre';
+            localStorage.setItem('statusMesas', JSON.stringify(status));
+
+            atualizarBalcao();
+            alert(`Mesa ${num} finalizada!`);
+        }
+
+        function gerarRelatorioVendas() {
+            const vendas = JSON.parse(localStorage.getItem('vendasDia')) || [];
+            let html = "<h1>Relatório Diário de Vendas - Lugar</h1><table class='table'><thead><tr><th>Data</th><th>Mesa</th><th>Total</th></tr></thead><tbody>";
+            let totalGeral = 0;
+            
+            vendas.forEach(v => {
+                html += `<tr><td>${v.data}</td><td>${v.mesa}</td><td>R$ ${v.total.toFixed(2)}</td></tr>`;
+                totalGeral += v.total;
+            });
+
+            html += `</tbody></table><h3>Total Geral: R$ ${totalGeral.toFixed(2)}</h3>`;
+            
+            const win = window.open('', '_blank');
+            win.document.write(html);
+            win.print();
+        }
+
+        function limparTudo() {
+            if(confirm("Deseja apagar todos os dados do dia?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // Atualiza a cada 5 segundos automaticamente
+        setInterval(atualizarBalcao, 5000);
+        atualizarBalcao();
+    </script>
+</body>
+</html>

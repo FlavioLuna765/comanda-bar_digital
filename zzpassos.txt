@@ -203,3 +203,8 @@ _ css. do index
         }, 5000);
     }
 </script>
+
+
+--------------------------------
+
+<script src="https://cdn.tailwindcss.com"></script>

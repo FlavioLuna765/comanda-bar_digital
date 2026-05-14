@@ -1,3 +1,4 @@
+    <style>
         :root {
             --bg-dark: #0f0f0f;         /* Fundo quase preto */
             --card-dark: #1e1e1e;       /* Cinza chumbo para os cards */
@@ -118,3 +119,4 @@
             margin-top: 4rem; 
             font-size: 0.9rem;
         }
+    </style> 

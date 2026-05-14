@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lugar - Cafeteria Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        :root { --gold: #d4af37; --glass: rgba(255, 255, 255, 0.08); --border: rgba(255, 255, 255, 0.15); }
+        body { background: #0a0a0b; color: #fff; font-family: 'Poppins', sans-serif; padding-bottom: 100px; }
+        .glass-card { background: var(--glass); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        .btn-gold { background: var(--gold); color: #000; font-weight: 600; border: none; border-radius: 8px; }
+        .btn-outline-gold { border: 1px solid var(--gold); color: var(--gold); background: transparent; }
+        .table-item { border: 1px solid var(--gold); border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .table-item.active { background: var(--gold); color: #000; }
+        .menu-item { border-bottom: 1px solid var(--border); padding: 12px 0; display: flex; justify-content: space-between; align-items: center; }
+        .comanda-flutuante { position: fixed; bottom: 0; left: 0; right: 0; background: #161618; border-top: 2px solid var(--gold); padding: 15px; z-index: 1000; }
+        #balcao-view, #menu-view { display: none; }
+        .badge-status { font-size: 0.7rem; padding: 5px 10px; border-radius: 50px; }
+    </style>
+</head>
+<body>
+
+    <!-- SELEÇÃO DE MESA -->
+    <div id="setup-view" class="container mt-5">
+        <div class="glass-card text-center">
+            <h2 style="color: var(--gold);">Lugar</h2>
+            <p class="text-muted">Selecione sua mesa para começar</p>
+            <div class="row g-2 mb-4" id="tableGrid"></div>
+            <button class="btn btn-gold w-100 p-3" onclick="abrirCardapio()">ABRIR CARDÁPIO</button>
+        </div>
+    </div>
+
+    <!-- TELA DO CLIENTE (CARDÁPIO + COMANDA) -->
+    <div id="menu-view" class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 id="mesaTitulo">Mesa --</h4>
+            <span id="statusGlobal" class="badge-status bg-success">Comanda Aberta</span>
+        </div>
+
+        <div class="glass-card">
+            <h6 class="text-uppercase mb-3" style="color: var(--gold); letter-spacing: 1px;">Cardápio</h6>
+            <div id="listaProdutos"></div>
+        </div>
+
+        <div class="glass-card mb-5">
+            <h6 class="text-uppercase mb-3" style="color: var(--gold);">Itens na Comanda</h6>
+            <div id="itensComanda" class="small">
+                <p class="text-muted italic">Nenhum pedido enviado ainda.</p>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between">
+                <span>Subtotal:</span><span id="c-sub">R$ 0,00</span>
+            </div>
+            <div class="d-flex justify-content-between text-muted">
+                <span>Taxa (10%):</span><span id="c-taxa">R$ 0,00</span>
+            </div>
+            <div class="d-flex justify-content-between fw-bold fs-5 mt-2">
+                <span>Total:</span><span id="c-total" style="color: var(--gold);">R$ 0,00</span>
+            </div>
+        </div>
+
+        <!-- Barra de Ação Inferior -->
+        <div class="comanda-flutuante d-flex gap-2">
+            <select id="pagamentoTipo" class="form-select bg-dark text-white border-secondary">
+                <option value="Cartão">Cartão (Levar Máquina)</option>
+                <option value="Pix">Pix (Confirmar Pago)</option>
+            </select>
+            <button class="btn btn-gold flex-grow-1" onclick="fecharPeloCliente()">FECHAR CONTA</button>
+        </div>
+    </div>
+
+    <!-- TELA DO BALCÃO (ADMIN) -->
+    <div id="balcao-view" class="container mt-4">
+        <div class="glass-card border-warning">
+            <h4 class="text-center mb-4">Monitor do Balcão</h4>
+            <div id="monitorPedidos"></div>
+            <hr>
+            <button class="btn btn-outline-danger w-100" onclick="location.reload()">LIMPAR SISTEMA / NOVA MESA</button>
+        </div>
+    </div>
+
+    <script>
+        let mesaAtiva = null;
+        let comandaConfirmada = [];
+        let statusConta = "Aberta";
+
+        const produtos = [
+            { id: 1, nome: "Espresso Tradicional", preco: 9.00 },
+            { id: 2, nome: "Cappuccino Italiano", preco: 15.00 },
+            { id: 3, nome: "Croissant Recheado", preco: 18.00 },
+            { id: 4, nome: "Pão de Queijo Premium", preco: 7.50 }
+        ];
+
+        // Iniciar Mesas
+        const grid = document.getElementById('tableGrid');
+        for(let i=1; i<=10; i++) {
+            grid.innerHTML += `<div class="col-3 col-md-2"><div class="table-item" onclick="selecionarMesa(${i}, this)">${i}</div></div>`;
+        }
+
+        function selecionarMesa(num, el) {
+            document.querySelectorAll('.table-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            mesaAtiva = num;
+        }
+
+        function abrirCardapio() {
+            if(!mesaAtiva) return alert("Selecione uma mesa!");
+            document.getElementById('setup-view').style.display = 'none';
+            document.getElementById('menu-view').style.display = 'block';
+            document.getElementById('mesaTitulo').innerText = "Mesa " + mesaAtiva;
+            renderProdutos();
+        }
+
+        function renderProdutos() {
+            const container = document.getElementById('listaProdutos');
+            container.innerHTML = produtos.map(p => `
+                <div class="menu-item">
+                    <div><strong>${p.nome}</strong><br><small class="text-muted">R$ ${p.preco.toFixed(2)}</small></div>
+                    <button class="btn btn-sm btn-outline-gold" onclick="adicionarItem(${p.id})">PEDIR</button>
+                </div>
+            `).join('');
+        }
+
+        function adicionarItem(id) {
+            const p = produtos.find(item => item.id === id);
+            comandaConfirmada.push(p);
+            atualizarComanda();
+            // Ao adicionar, já atualiza o balcão "em tempo real" (simulado)
+            atualizarMonitorBalcao();
+        }
+
+        function atualizarComanda() {
+            const container = document.getElementById('itensComanda');
+            const sub = comandaConfirmada.reduce((a, b) => a + b.preco, 0);
+            const taxa = sub * 0.10;
+            const total = sub + taxa;
+
+            container.innerHTML = comandaConfirmada.map(i => `<div>• ${i.nome} - R$ ${i.preco.toFixed(2)}</div>`).join('');
+            document.getElementById('c-sub').innerText = `R$ ${sub.toFixed(2)}`;
+            document.getElementById('c-taxa').innerText = `R$ ${taxa.toFixed(2)}`;
+            document.getElementById('c-total').innerText = `R$ ${total.toFixed(2)}`;
+        }
+
+        function fecharPeloCliente() {
+            if(comandaConfirmada.length === 0) return alert("Comanda vazia!");
+            const tipo = document.getElementById('pagamentoTipo').value;
+            statusConta = "Aguardando Fechamento";
+            
+            document.getElementById('statusGlobal').innerText = "Fechando...";
+            document.getElementById('statusGlobal').className = "badge-status bg-warning text-dark";
+            
+            alert(`Pedido de fechamento enviado! Forma: ${tipo}`);
+            
+            // Vai para o balcão mostrar o resultado final
+            document.getElementById('menu-view').style.display = 'none';
+            document.getElementById('balcao-view').style.display = 'block';
+            atualizarMonitorBalcao(tipo);
+        }
+
+        function atualizarMonitorBalcao(formaPgto = "Não definido") {
+            const sub = comandaConfirmada.reduce((a, b) => a + b.preco, 0);
+            const taxa = sub * 0.10;
+            const total = sub + taxa;
+            const statusPagamento = (formaPgto === "Pix") ? '<span class="text-success">PAGO (PIX)</span>' : '<span class="text-danger">PENDENTE (LEVAR MÁQUINA)</span>';
+
+            document.getElementById('monitorPedidos').innerHTML = `
+                <div class="mb-3">
+                    <h5>Mesa ${mesaAtiva} <span class="badge bg-danger ms-2">CONTA SOLICITADA</span></h5>
+                    <p class="small mb-1">Forma de Pagamento: <strong>${formaPgto}</strong></p>
+                    <p class="small">Status Financeiro: <strong>${statusPagamento}</strong></p>
+                </div>
+                <div class="bg-dark p-3 rounded mb-3" style="font-size: 0.85rem;">
+                    ${comandaConfirmada.map(i => `<div class="d-flex justify-content-between"><span>${i.nome}</span><span>R$ ${i.preco.toFixed(2)}</span></div>`).join('')}
+                    <hr>
+                    <div class="d-flex justify-content-between"><span>Subtotal:</span><span>R$ ${sub.toFixed(2)}</span></div>
+                    <div class="d-flex justify-content-between"><span>Taxa 10%:</span><span>R$ ${taxa.toFixed(2)}</span></div>
+                    <div class="d-flex justify-content-between fw-bold text-warning"><span>TOTAL:</span><span>R$ ${total.toFixed(2)}</span></div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
